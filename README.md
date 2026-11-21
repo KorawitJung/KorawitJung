@@ -3,9 +3,3 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/KorawitJung/KorawitJung/output/maple.svg" width="100%" alt="ต้นเมเปิลสีเหลืองริมลำธาร ดอกสีแดงแต่ละดอกคือหนึ่ง contribution ของวันนี้" />
 </p>
-
-<p align="center">
-  <img src="koi/koi.gif" width="112" alt="My koi, redrawn every night from my GitHub activity" />
-</p>
-
-<p align="center"><sub>My koi is drawn by <a href="https://github.com/yalongwastaken/git-koi">git-koi</a> from my public GitHub activity.</sub></p>
