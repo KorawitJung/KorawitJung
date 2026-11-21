@@ -14,7 +14,7 @@ test('draws one flower per contribution up to capacity', () => {
 	assert.equal(flowers(renderScene(500)), FLOWER_CAPACITY);
 });
 test('capacity is in the planned range', () => {
-	assert.ok(FLOWER_CAPACITY >= 60 && FLOWER_CAPACITY <= 120, String(FLOWER_CAPACITY));
+	assert.ok(FLOWER_CAPACITY >= 50 && FLOWER_CAPACITY <= 120, String(FLOWER_CAPACITY));
 });
 test('scene stays alive with zero flowers', () => {
 	const svg = renderScene(0);
@@ -31,4 +31,19 @@ test('svg is safe and small enough for a README', () => {
 });
 test('rejects a count that is not a non-negative integer', () => {
 	for (const bad of [-1, 2.5, NaN]) assert.throws(() => renderScene(bad), RangeError);
+});
+test('no two flowers touch, even at the corners', () => {
+	const svg = renderScene(FLOWER_CAPACITY);
+	const centers = [...svg.matchAll(/class="flower" transform="translate\((\d+),(\d+)\)"/g)].map(m => [m[1] / 5, m[2] / 5]);
+	const cells = ([x, y]) => [[x, y], [x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
+	for (let i = 0; i < centers.length; i++) for (let j = i + 1; j < centers.length; j++) {
+		for (const a of cells(centers[i])) for (const b of cells(centers[j])) {
+			assert.ok(Math.max(Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1])) > 1, `flowers ${centers[i]} and ${centers[j]} touch`);
+		}
+	}
+});
+test('reduced motion also hides the drifting leaves', () => {
+	const svg = renderScene(0);
+	assert.equal(count(svg, /<rect class="drift"/g), 2);
+	assert.match(svg, /prefers-reduced-motion:reduce\)\{[^}]*\}[^@]*\.drift\{display:none\}/);
 });

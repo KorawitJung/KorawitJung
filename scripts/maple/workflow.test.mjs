@@ -7,3 +7,6 @@ const workflow = readFileSync(new URL('../../.github/workflows/maple.yml', impor
 test('only pushes to main can publish the tree', () => {
 	assert.match(workflow, /push:\r?\n\s+branches: \[main\]\r?\n\s+paths:/);
 });
+test('a hung run is cut off after 5 minutes', () => {
+	assert.match(workflow, /runs-on: ubuntu-latest\r?\n\s+timeout-minutes: 5/);
+});

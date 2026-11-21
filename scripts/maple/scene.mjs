@@ -110,7 +110,7 @@ function buildScene() {
 		if (d < .82 + r() * .3) {
 			const v = (MX - x) * .015 + (MY - y) * .035 + r() * .8 + .5;
 			set(x, y, GOLD[Math.max(0, Math.min(4, Math.floor(v * 2)))], 'leaf');
-			if (d < .62) canopy.push([x, y]);
+			if (d < .72) canopy.push([x, y]);
 		}
 	}
 
@@ -148,11 +148,16 @@ function buildScene() {
 	return { G, ripples: ripples.map(([x, y], i) => ({ x, y, delay: rippleDelays[i] })), fallingLeaves, streamPath, canopy };
 }
 
+function petalsTouch([ax, ay], [bx, by]) {
+	const dx = Math.abs(ax - bx), dy = Math.abs(ay - by);
+	return dx + dy <= 4 && Math.max(dx, dy) <= 3;
+}
+
 function placeSpots(canopy) {
 	const rs = mulberry32(SPOT_SEED), spots = [];
 	for (let k = 0; k < SPOT_TRIES && spots.length < MAX_SPOTS; k++) {
 		const c = canopy[Math.floor(rs() * canopy.length)];
-		if (spots.every(p => Math.abs(p[0] - c[0]) + Math.abs(p[1] - c[1]) > 3)) spots.push(c);
+		if (spots.every(p => !petalsTouch(p, c))) spots.push(c);
 	}
 	return spots;
 }
@@ -179,7 +184,7 @@ const STYLE = `<style>
 .leaf-fall{opacity:0;animation-duration:7s;animation-timing-function:steps(26,end);animation-iteration-count:infinite}
 .ripple{opacity:0;animation:ripple 2.4s steps(1,end) infinite}
 @keyframes ripple{0%{opacity:0}55%{opacity:.9}85%{opacity:0}}
-@media (prefers-reduced-motion:reduce){.bloom{animation:none;transform:none}.leaf-fall,.ripple{animation:none}}
+@media (prefers-reduced-motion:reduce){.bloom{animation:none;transform:none}.leaf-fall,.ripple{animation:none}.drift{display:none}}
 KEYFRAMES</style>`;
 
 const scene = buildScene();
@@ -194,7 +199,7 @@ const staticSvg = (() => {
 		`<rect class="ripple" x="${p.x * C}" y="${p.y * C}" width="${C}" height="${C}" fill="${RIPPLE}" style="animation-delay:${p.delay}s"/>`).join('');
 	const drift = ['#E0A800', '#D2672A'].map((fill, i) => {
 		const timing = `dur="16s" begin="${i * 8}s" repeatCount="indefinite"`;
-		return `<rect width="${C}" height="${C}" fill="${fill}" opacity="0"><animateMotion path="${scene.streamPath}" ${timing}/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.06;0.94;1" ${timing}/></rect>`;
+		return `<rect class="drift" width="${C}" height="${C}" fill="${fill}" opacity="0"><animateMotion path="${scene.streamPath}" ${timing}/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.06;0.94;1" ${timing}/></rect>`;
 	}).join('');
 	const leaves = scene.fallingLeaves.map((l, i) =>
 		`<g transform="translate(${l.x},${l.y})"><rect class="leaf-fall" width="${C}" height="${C}" fill="${l.color}" style="animation-name:fall${i};animation-delay:${l.delay}s"/></g>`).join('');

@@ -34,3 +34,8 @@ test('without a token it fails and writes nothing', async () => {
 	await assert.rejects(main(['--out', out], {}), /GITHUB_TOKEN/);
 	assert.equal(existsSync(out), false);
 });
+test('a negative --count gets the script message, not a parser error', async () => {
+	for (const argv of [['--count', '-1', '--out', 'x.svg'], ['--count=-1', '--out', 'x.svg']]) {
+		await assert.rejects(main(argv, {}), /non-negative integer/);
+	}
+});

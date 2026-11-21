@@ -29,7 +29,8 @@ export async function fetchTodayCount({ login, token, now, fetchImpl = fetch }) 
 }
 
 export async function main(argv, env) {
-	const { values } = parseArgs({ args: argv, options: { out: { type: 'string' }, count: { type: 'string' }, login: { type: 'string' } } });
+	const args = argv.flatMap((a, i) => (a === "--count" && /^-/.test(argv[i + 1] ?? "") ? [] : i > 0 && argv[i - 1] === "--count" && /^-/.test(a) ? [`--count=${a}`] : [a]));
+	const { values } = parseArgs({ args, options: { out: { type: 'string' }, count: { type: 'string' }, login: { type: 'string' } } });
 	if (!values.out) throw new Error('--out <file> is required');
 	const now = new Date();
 	let count;
