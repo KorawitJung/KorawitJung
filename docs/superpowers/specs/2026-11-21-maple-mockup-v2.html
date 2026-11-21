@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>Maple profile mockup v2 (approved look)</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem;color:#222}
+.blp{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:bloom .45s steps(3,end) forwards}
+@keyframes bloom{to{transform:scale(1)}}
+.lfp{opacity:0;animation:fallp 7s steps(26,end) infinite}
+@keyframes fallp{0%{transform:translate(0,0);opacity:0}5%{opacity:1}35%{transform:translate(var(--a),40px)}70%{transform:translate(var(--b),80px)}90%{opacity:1}100%{transform:translate(var(--c),110px);opacity:0}}
+.rip{opacity:0;animation:rip 2.4s steps(1,end) infinite}
+@keyframes rip{0%{opacity:0}55%{opacity:.9}85%{opacity:0}}
+.drift{offset-rotate:0deg;opacity:0;animation:drift 16s linear infinite}
+@keyframes drift{0%{offset-distance:0%;opacity:0}6%{opacity:1}94%{opacity:1}100%{offset-distance:100%;opacity:0}}
+</style>
+</head>
+<body>
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 1rem">
+<label for="n">contributions วันนี้</label>
+<input type="range" id="n" min="0" max="60" step="1" value="12" style="flex:1">
+<span id="nout">12</span>
+<button id="replay">เล่นดอกบานใหม่</button>
+</div>
+<div id="scene" style="border-radius:12px;overflow:hidden;line-height:0"></div>
+<script>
+const NS='http://www.w3.org/2000/svg',W=128,H=64,C=5;
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+const r=rng(21),pick=a=>a[Math.floor(r()*a.length)];
+function mix(h1,h2,t){const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16);return'#'+[16,8,0].map(s=>Math.round(((a>>s)&255)*(1-t)+((b>>s)&255)*t).toString(16).padStart(2,'0')).join('')}
+const HAZE='#D6D0C6',AUT=['#B9471C','#D2672A','#E0892F','#E8A93C','#C98A1A','#8E3518','#D9B24A'];
+const GOLD=['#7A5200','#A87400','#C98F00','#E0A800','#F2C230'];
+const PEB=['#9A948A','#B5AFA4','#7D776E','#C9C2B5','#A8A196'],LIT=['#8B4A2B','#A0522D','#7A3E22','#B5652E','#6B4A2E'];
+const WAT=['#2F78A8','#2A6B99','#3E8CBE','#256190'],WHAZE='#BFDCEE';
+const GRN=['#2C5A26','#3B7432','#4E8C3C','#67A84A'];
+const G=Array.from({length:H},()=>Array(W).fill('#ECE8E0'));
+const M=Array.from({length:H},()=>Array(W).fill(null));
+const set=(x,y,c,o)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&x<W&&y>=0&&y<H){G[y][x]=c;if(o)M[y][x]=o}};
+const SY=29,FY=63;
+const stream=y=>{const t=(FY-y)/(FY-SY);return{t,cx:30+42*t+Math.sin(t*4)*6*(1-t),w:1.5+26*Math.pow(1-t,1.3)}};
+for(let x=0;x<W;x++){const top=3+Math.sin(x*.35)*1.5+Math.sin(x*.9)+r()*1.5;for(let y=0;y<SY;y++)if(y>top)set(x,y,mix(pick(AUT),HAZE,.58+r()*.12-(y/SY)*.1))}
+for(let i=0;i<46;i++){const x=Math.floor(r()*W),y0=7+r()*14;for(let y=y0;y<SY;y++)if(r()<.85)set(x,y,mix(r()<.6?'#D9D2C4':'#5E4634',HAZE,.45))}
+const rips=[];
+for(let y=SY;y<H;y++){const{t,cx,w}=stream(y),lb=2+6*(1-t),rb=3+28*(1-t);for(let x=0;x<W;x++){const dx=x-cx;
+if(Math.abs(dx)<w/2){set(x,y,mix(pick(WAT),WHAZE,t*.45));if(r()<.08)rips.push([x,y])}
+else if((dx<0&&-dx<w/2+lb)||(dx>0&&dx<w/2+rb))set(x,y,mix(r()<.12?pick(LIT):pick(PEB),HAZE,t*.4));
+else set(x,y,mix(pick(LIT),HAZE,t*.4))}}
+function bush(cx,yb,s){const rx=1.5+5*s,ry=1+3.2*s,cy=yb-ry*.6;
+for(let y=Math.floor(cy-ry-1);y<=yb;y++)for(let x=Math.floor(cx-rx-1);x<=cx+rx+1;x++){const d=((x-cx)/rx)**2+((y-cy)/ry)**2;if(d<.8+r()*.3){const lit=(cy-y)/ry*.9+(cx-x)/rx*.3+r()*.8;set(x,y,mix(GRN[Math.max(0,Math.min(3,Math.floor(1.3+lit*1.4)))],HAZE,(1-s)*.5))}}}
+function tree(x,yb,s){const h=Math.round(5+24*s),tw=s>.6?2:1,tc=r()<.55?'#D9D2C4':'#4A3626';
+for(let y=yb-h;y<=yb;y++)for(let k=0;k<tw;k++)set(x+k,y,mix(tc,HAZE,(1-s)*.45));
+const cx=x+(r()-.5)*2,cy=yb-h*.82,rx=2.5+9*s,ry=3+8*s;
+for(let y=Math.floor(cy-ry-1);y<=cy+ry+1;y++)for(let xx=Math.floor(cx-rx-1);xx<=cx+rx+1;xx++){const d=((xx-cx)/rx)**2+((y-cy)/ry)**2;if(d<.75+r()*.35)set(xx,y,mix(pick(AUT),HAZE,(1-s)*.55))}}
+const items=[];
+[.04,.12,.2,.3,.4,.52,.66,.82,1].forEach(d=>items.push([d,'L','t']));
+[.06,.16,.26,.36,.48,.58].forEach(d=>items.push([d,'R','t']));
+[.1,.22,.34,.46,.6,.74,.9,.98].forEach(d=>items.push([d,'L','b']));
+[.14,.28,.42,.55,.7].forEach(d=>items.push([d,'R','b']));
+items.sort((a,b)=>a[0]-b[0]).forEach(([d,side,k])=>{const yb=Math.round(FY-(1-d)*(FY-SY)),{t,cx,w}=stream(yb);
+const off=k==='t'?(2+5*d)+r()*3:r()*(4+10*d);
+const x=Math.round(side==='L'?cx-w/2-(2+6*(1-t))-off:cx+w/2+(3+28*(1-t))+1+off);
+if(k==='t'){tree(x,yb,d);if(r()<.6)bush(x+(r()-.5)*4,yb+1,d*.8)}else bush(x,yb,d)});
+bush(112,62,1);bush(122,60,.85);bush(73,61,.9);bush(4,62,1);
+const MX=101,MY=21,RX=25,RY=16,cells=[];
+for(let y=34;y<=60;y++){const l=y>=57?98:99,h=y>=57?103:102;for(let x=l;x<=h;x++)set(x,y,x===h?'#4A2E12':'#6B4420','trunk')}
+for(let t=0;t<9;t++){set(99-t,36-t,'#6B4420','trunk');set(98-t,36-t,'#6B4420','trunk');set(103+t,37-t,'#4A2E12','trunk');set(104+t,37-t,'#4A2E12','trunk')}
+for(let y=0;y<42;y++)for(let x=70;x<W;x++){const d=((x-MX)/RX)**2+((y-MY)/RY)**2;if(d<.82+r()*.3){const v=(MX-x)*.015+(MY-y)*.035+r()*.8+.5;set(x,y,GOLD[Math.max(0,Math.min(4,Math.floor(v*2)))],'leaf');if(d<.62)cells.push([x,y])}}
+for(let x=80;x<=94;x++)set(x,59,'#3E2616');
+const BG='#2F5E3A',BD='#1B3A24',BL='#4C8456';
+for(let x=81;x<=92;x++){set(x,50,BL,'bench');set(x,52,BG,'bench');set(x,54,BL,'bench');set(x,55,BG,'bench')}
+for(let y=50;y<=53;y++){set(81,y,BD,'bench');set(92,y,BD,'bench')}
+for(let y=56;y<=58;y++){set(82,y,BD,'bench');set(91,y,BD,'bench')}
+[[80,53],[80,54],[93,53],[93,54]].forEach(([x,y])=>set(x,y,BD,'bench'));
+const OUT={leaf:'#4A3000',trunk:'#2A1808',bench:'#0E1A12'};
+const O=[];
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(M[y][x]||(x>81&&x<92&&y>50&&y<54))continue;for(const[a,b]of[[0,-1],[-1,0],[1,0],[0,1]]){const m=M[y+b]&&M[y+b][x+a];if(m){O.push([x,y,OUT[m]]);break}}}
+O.forEach(([x,y,c])=>G[y][x]=c);
+const s=el('svg',{viewBox:`0 0 ${W*C} ${H*C}`,width:'100%','shape-rendering':'crispEdges'});
+for(let y=0;y<H;y++){let x=0;while(x<W){let e=x;while(e+1<W&&G[y][e+1]===G[y][x])e++;el('rect',{x:x*C,y:y*C,width:(e-x+1)*C,height:C,fill:G[y][x]},s);x=e+1}}
+const rg=el('g',{},s);rips.forEach(([x,y])=>{const e=el('rect',{x:x*C,y:y*C,width:C,height:C,fill:'#EAF6FF',class:'rip'},rg);e.style.animationDelay=(r()*2.4).toFixed(2)+'s'});
+let pd='';for(let y=SY+1;y<H;y++){const{cx}=stream(y);pd+=(pd?'L':'M')+(cx*C).toFixed(1)+','+(y*C)}
+for(let i=0;i<2;i++){const e=el('rect',{width:C,height:C,fill:i?'#D2672A':'#E0A800',class:'drift'},s);e.style.offsetPath=`path('${pd}')`;e.style.animationDelay=(i*8)+'s'}
+const fl=el('g',{},s),lv=el('g',{},s);
+for(let i=0;i<10;i++){const o=el('g',{transform:`translate(${(80+Math.floor(r()*40))*C},${(33+Math.floor(r()*5))*C})`},lv);const p=el('rect',{width:C,height:C,fill:GOLD[1+Math.floor(r()*4)],class:'lfp'},o);const q=v=>Math.round(v/5)*5;p.style.setProperty('--a',q(r()*30-15)+'px');p.style.setProperty('--b',q(r()*40-20)+'px');p.style.setProperty('--c',q(r()*50-25)+'px');p.style.animationDelay=((i<5?0:3.5)+(i%5)*.4+r()*.2).toFixed(2)+'s'}
+const spots=[],rs=rng(5);
+for(let k=0;k<6000&&spots.length<60;k++){const c=cells[Math.floor(rs()*cells.length)];if(spots.every(p=>Math.abs(p[0]-c[0])+Math.abs(p[1]-c[1])>3))spots.push(c)}
+function flower(x,y,i){const o=el('g',{transform:`translate(${x*C},${y*C})`},fl),g=el('g',{class:'blp'},o);g.style.animationDelay=(.3+i*.12).toFixed(2)+'s';[[0,-1],[-1,0],[1,0],[0,1]].forEach(([a,b])=>el('rect',{x:a*C,y:b*C,width:C,height:C,fill:'#D7263D'},g));el('rect',{x:0,y:0,width:C,height:C,fill:'#FFE08A'},g)}
+function render(){const n=+document.getElementById('n').value;document.getElementById('nout').textContent=n;fl.replaceChildren();for(let i=0;i<n;i++){const p=spots[i%spots.length];flower(p[0],p[1],i)}}
+document.getElementById('scene').appendChild(s);render();
+document.getElementById('n').addEventListener('input',render);
+document.getElementById('replay').addEventListener('click',render);
+</script>
+</body>
+</html>
