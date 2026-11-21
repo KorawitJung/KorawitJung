@@ -7,6 +7,7 @@ on:
     - cron: "50 16 * * *"
   workflow_dispatch:
   push:
+    branches: [main]
     paths: [scripts/maple/**, .github/workflows/maple.yml]
 
 permissions:
