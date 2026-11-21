@@ -1,0 +1,46 @@
+name: Maple
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+    - cron: "30 16 * * *"
+    - cron: "50 16 * * *"
+  workflow_dispatch:
+  push:
+    paths: [scripts/maple/**, .github/workflows/maple.yml]
+
+permissions:
+  contents: write
+
+concurrency: maple
+
+jobs:
+  maple:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Test the scene
+        run: node --test scripts/maple/*.test.mjs
+      - name: Draw today's tree
+        run: node scripts/maple/render.mjs --out "$RUNNER_TEMP/maple.svg"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MAPLE_LOGIN: ${{ github.repository_owner }}
+      - name: Publish to the output branch if it changed
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if git fetch --quiet --depth=1 origin output 2>/dev/null \
+            && git show FETCH_HEAD:maple.svg > "$RUNNER_TEMP/old.svg" 2>/dev/null \
+            && cmp -s "$RUNNER_TEMP/old.svg" "$RUNNER_TEMP/maple.svg"; then
+            echo "The maple is unchanged; nothing to publish."
+            exit 0
+          fi
+          pub="$RUNNER_TEMP/pub"
+          mkdir "$pub" && cp "$RUNNER_TEMP/maple.svg" "$pub/"
+          cd "$pub"
+          git init --quiet --initial-branch=output
+          git add maple.svg
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --quiet --message "maple: draw today's tree"
+          git push --quiet --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" output
