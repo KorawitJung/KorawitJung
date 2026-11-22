@@ -30,5 +30,3 @@ Python · SQL · R / Shiny · pandas · scikit-learn · Excel · fraud analytics
 - [Video_Editing_BluesStyle](https://github.com/KorawitJung/Video_Editing_BluesStyle) · [video-grab](https://github.com/KorawitJung/video-grab) · [Thai-withEngSub-Clip](https://github.com/KorawitJung/Thai-withEngSub-Clip) · [maple-profile](https://github.com/KorawitJung/maple-profile)
 
 ---
-
-🇹🇭 อดีต IT Auditor ที่ผันตัวมาเป็น Data Scientist ในกรุงเทพฯ สนใจงาน Fraud Analytics, การควบคุมภายในด้านไอที และแดชบอร์ดข้อมูลเศรษฐกิจไทย ดูผลงานทั้งหมดได้ที่ [korawitjung.github.io](https://korawitjung.github.io/)
